@@ -116,3 +116,19 @@ IBulkImportable<T> — пакетний імпорт даних (bulkImport).
 IExportable — вивантаження даних у зовнішні формати (exportToCsv).
 IPurgeable — інфраструктурне скидання та очищення даних (purgeAll).
 
+
+Завдання 5. Dependency Inversion Principle
+
+У вихідній кодовій базі клас бізнес-логіки UserProfileManager напряму створював екземпляри низькорівневих інфраструктурних класів RedisCacheService, PostgresUserRepository та SendGridNotificationClient у своєму конструкторі за допомогою оператора new. Це утворювало жорстке зв'язування (Tight Coupling), що унеможливлювало юніт-тестування та гнучку заміну джерел даних чи зовнішніх API.
+
+Для дотримання принципу DIP було виділено 3 інтерфейси-абстракції:
+
+ICacheService — абстракція для скидання оперативної пам'яті кешу.
+IUserRepository — абстракція для збереження даних профілю користувача.
+INotificationService — абстракція для надсилання повідомлень про безпеку.
+
+UserProfileManager позбувся прямих залежностей від конкретних класів RedisCacheService, PostgresUserRepository та SendGridNotificationClient.Оператор new видалено з конструктора UserProfileManager. Усі залежності передаються зовні через параметри конструктора.Реалізовано централізований клас збірки для зв'язування залежностей та підміни реалізацій під час виконання.
+
+
+
+
