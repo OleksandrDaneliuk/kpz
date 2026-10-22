@@ -1,4 +1,4 @@
-package variant2_userprofilemanager;
+package task5;
 
 public class Variant2_UserProfileManager {
 

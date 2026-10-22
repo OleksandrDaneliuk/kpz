@@ -1,4 +1,4 @@
-package variant2_userprofilemanager;
+package task5;
 
 public class CompositionRoot {
     public static void main(String[] args) {
