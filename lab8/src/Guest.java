@@ -31,4 +31,3 @@ public class Guest {
     public String getPassportNumber() { return passportNumber; }
 }
 
-

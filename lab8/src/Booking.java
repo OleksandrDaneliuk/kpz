@@ -5,7 +5,7 @@ public class Booking {
     private final Guest guest;
     private final Room room;
     private final int nights;
-    private final String season; // "Low", "High", "Peak"
+    private final SeasonalPricingStrategy seasonStrategy;
     private final boolean includeBreakfast;
     private final boolean includeParking;
 
@@ -15,7 +15,9 @@ public class Booking {
     private final double grandTotal;
     private String status;
 
-    private Booking(int bookingId, Guest guest, Room room, int nights, String season,
+    private Booking(int bookingId, Guest guest, Room room, int nights,
+                    SeasonalPricingStrategy seasonStrategy,
+                    TouristTaxCalculator taxCalculator,
                     boolean includeBreakfast, boolean includeParking) {
         if (bookingId <= 0) {
             throw new IllegalArgumentException("ID бронювання має бути додатним.");
@@ -27,36 +29,35 @@ public class Booking {
         this.guest = Objects.requireNonNull(guest, "Сутність Guest є обов'язковою.");
         this.room = Objects.requireNonNull(room, "Сутність Room є обов'язковою.");
         this.nights = nights;
-        this.season = season != null ? season : "Low";
+        this.seasonStrategy = seasonStrategy != null ? seasonStrategy : Season.LOW;
         this.includeBreakfast = includeBreakfast;
         this.includeParking = includeParking;
 
+        TouristTaxCalculator taxCalc = taxCalculator != null ? taxCalculator : new StandardTouristTaxCalculator();
+
         this.roomTotal = calculateRoomTotal();
         this.servicesTotal = calculateServicesTotal();
-        this.touristTax = calculateTouristTax();
+        this.touristTax = taxCalc.calculateTax(this.roomTotal, this.servicesTotal);
         this.grandTotal = calculateGrandTotal();
         this.status = "Confirmed";
     }
 
     public static Booking create(int bookingId, Guest guest, Room room, int nights,
                                  String season, boolean includeBreakfast, boolean includeParking) {
-        return new Booking(bookingId, guest, room, nights, season, includeBreakfast, includeParking);
-    }
-
-
-    private double getSeasonalMultiplier() {
-        if ("Peak".equalsIgnoreCase(season)) {
-            return 1.5;
-        } else if ("High".equalsIgnoreCase(season)) {
-            return 1.25;
-        } else if ("Low".equalsIgnoreCase(season)) {
-            return 0.9;
-        }
-        return 1.0;
+        return new Booking(
+                bookingId,
+                guest,
+                room,
+                nights,
+                Season.fromString(season),
+                new StandardTouristTaxCalculator(),
+                includeBreakfast,
+                includeParking
+        );
     }
 
     private double calculateRoomTotal() {
-        return room.getBasePricePerNight() * nights * getSeasonalMultiplier();
+        return room.getBasePricePerNight() * nights * seasonStrategy.getMultiplier();
     }
 
     private double calculateServicesTotal() {
@@ -68,10 +69,6 @@ public class Booking {
             services += 150.0 * nights;
         }
         return services;
-    }
-
-    private double calculateTouristTax() {
-        return (roomTotal + servicesTotal) * 0.01;
     }
 
     private double calculateGrandTotal() {
@@ -87,12 +84,11 @@ public class Booking {
                 "\nВсього: " + grandTotal + " грн";
     }
 
-
     public int getBookingId() { return bookingId; }
     public Guest getGuest() { return guest; }
     public Room getRoom() { return room; }
     public int getNights() { return nights; }
-    public String getSeason() { return season; }
+    public SeasonalPricingStrategy getSeasonStrategy() { return seasonStrategy; }
     public boolean isIncludeBreakfast() { return includeBreakfast; }
     public boolean isIncludeParking() { return includeParking; }
     public double getRoomTotal() { return roomTotal; }
@@ -101,6 +97,3 @@ public class Booking {
     public double getGrandTotal() { return grandTotal; }
     public String getStatus() { return status; }
 }
-
-
-
