@@ -15,10 +15,10 @@ public class Booking {
     private final double grandTotal;
     private String status;
 
-    private Booking(int bookingId, Guest guest, Room room, int nights,
-                    SeasonalPricingStrategy seasonStrategy,
-                    TouristTaxCalculator taxCalculator,
-                    boolean includeBreakfast, boolean includeParking) {
+    public Booking(int bookingId, Guest guest, Room room, int nights,
+                   SeasonalPricingStrategy seasonStrategy,
+                   TouristTaxCalculator taxCalculator,
+                   boolean includeBreakfast, boolean includeParking) {
         if (bookingId <= 0) {
             throw new IllegalArgumentException("ID бронювання має бути додатним.");
         }
@@ -29,31 +29,16 @@ public class Booking {
         this.guest = Objects.requireNonNull(guest, "Сутність Guest є обов'язковою.");
         this.room = Objects.requireNonNull(room, "Сутність Room є обов'язковою.");
         this.nights = nights;
-        this.seasonStrategy = seasonStrategy != null ? seasonStrategy : Season.LOW;
+        this.seasonStrategy = Objects.requireNonNull(seasonStrategy, "Стратегія сезону є обов'язковою.");
         this.includeBreakfast = includeBreakfast;
         this.includeParking = includeParking;
 
-        TouristTaxCalculator taxCalc = taxCalculator != null ? taxCalculator : new StandardTouristTaxCalculator();
-
         this.roomTotal = calculateRoomTotal();
         this.servicesTotal = calculateServicesTotal();
-        this.touristTax = taxCalc.calculateTax(this.roomTotal, this.servicesTotal);
+        this.touristTax = Objects.requireNonNull(taxCalculator, "Калькулятор збору є обов'язковим.")
+                .calculateTax(roomTotal, servicesTotal);
         this.grandTotal = calculateGrandTotal();
         this.status = "Confirmed";
-    }
-
-    public static Booking create(int bookingId, Guest guest, Room room, int nights,
-                                 String season, boolean includeBreakfast, boolean includeParking) {
-        return new Booking(
-                bookingId,
-                guest,
-                room,
-                nights,
-                Season.fromString(season),
-                new StandardTouristTaxCalculator(),
-                includeBreakfast,
-                includeParking
-        );
     }
 
     private double calculateRoomTotal() {
@@ -81,7 +66,8 @@ public class Booking {
                 "\nПроживання: " + roomTotal + " грн" +
                 "\nПослуги: " + servicesTotal + " грн" +
                 "\nТуристичний збір: " + touristTax + " грн" +
-                "\nВсього: " + grandTotal + " грн";
+                "\nВсього: " + grandTotal + " грн" +
+                "\nСтатус: " + status;
     }
 
     public int getBookingId() { return bookingId; }
