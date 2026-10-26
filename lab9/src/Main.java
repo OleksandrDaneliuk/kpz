@@ -2,6 +2,8 @@ void main() {
     demoTask1_Singleton();
     IO.println("\n-----------------------------------------------------------------------\n");
 
+    demoTask2_Prototype();
+    IO.println("\n-----------------------------------------------------------------------\n");
 }
 
 public static void demoTask1_Singleton() {
@@ -22,4 +24,38 @@ public static void demoTask1_Singleton() {
     Logger.log("Кардіологія", "Стан ліжка 101: " + registry2.getBed("101"));
 
     Logger.log("Main", "Перевірка посилань (registry1 == registry2): " + (registry1 == registry2));
+}
+
+public static void demoTask2_Prototype() {
+    System.out.println(">>> ЗАВДАННЯ 2: Клонування планів обстеження й лікування (Prototype)\n");
+
+    Logger.log("Система", "Ініціалізація базового прототипу кардіологічного плану...");
+    TreatmentPlan cardiologyBasePrototype = new TreatmentPlan(
+            "Кардіологічний базовий",
+            List.of("Загальний аналіз крові", "ЕКГ", "Біохімія крові"),
+            List.of("ЕхоКГ", "Моніторинг АТ"),
+            "Дієта №10 (низькосольова)",
+            "Палатний"
+    );
+
+    System.out.println();
+
+    Logger.log("Лікар-Кардіолог", "Клонування базового плану для пацієнта Петренко А. М.");
+    TreatmentPlan planPatient1 = cardiologyBasePrototype.clone();
+    planPatient1.setPatientName("Петренко А. М.");
+    planPatient1.addTest("Аналіз на тропоніни"); 
+    planPatient1.printInfo();
+
+    System.out.println();
+
+    Logger.log("Лікар-Кардіолог", "Клонування базового плану для пацієнта Сидоренко О. В.");
+    TreatmentPlan planPatient2 = cardiologyBasePrototype.clone();
+    planPatient2.setPatientName("Сидоренко О. В.");
+    planPatient2.setDiet("Дієта №9 (гіпоглікемічна)");
+    planPatient2.printInfo();
+
+    System.out.println();
+
+    Logger.log("Система", "Перевірка стану вихідного базового прототипу:");
+    cardiologyBasePrototype.printInfo();
 }
