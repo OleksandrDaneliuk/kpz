@@ -8,6 +8,9 @@ public class Main {
         demoTask2_Prototype();
         System.out.println("\n-----------------------------------------------------------------------\n");
 
+        demoTask3_ObjectPool();
+        System.out.println("\n-----------------------------------------------------------------------\n");
+
     }
 
     public static void demoTask1_Singleton() {
@@ -62,5 +65,31 @@ public class Main {
 
         Logger.log("Система", "Перевірка стану вихідного базового прототипу:");
         cardiologyBasePrototype.printInfo();
+    }
+
+    public static void demoTask3_ObjectPool() {
+        System.out.println(">>> ЗАВДАННЯ 3: Управління та розподіл апаратів УЗД (Object Pool)\n");
+
+        UltrasoundMachinePool pool = new UltrasoundMachinePool(2);
+        System.out.println();
+
+        UltrasoundMachine machine1 = pool.acquireMachine("Кардіологія", "Іванов Г. П.", "Кардіо-профіль");
+        System.out.println();
+
+        UltrasoundMachine machine2 = pool.acquireMachine("Хірургія", "Васильєв К. Д.", "Черевна порожнина");
+        System.out.println();
+
+        UltrasoundMachine machine3 = pool.acquireMachine("Терапія", "Шевченко М. О.", "Загальний");
+        System.out.println();
+
+        Logger.log("Кардіологія", "Завершення обстеження пацієнта Іванов Г. П.");
+        pool.releaseMachine(machine1);
+        System.out.println();
+
+        machine3 = pool.acquireMachine("Терапія", "Шевченко М. О.", "Загальний");
+        System.out.println();
+
+        pool.releaseMachine(machine2);
+        pool.releaseMachine(machine3);
     }
 }
