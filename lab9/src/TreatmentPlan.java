@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class TreatmentPlan implements Cloneable {
+class TreatmentPlan implements Prototype<TreatmentPlan> {
     private String planType;
     private List<String> tests;
     private List<String> procedures;
@@ -12,13 +12,18 @@ class TreatmentPlan implements Cloneable {
     public TreatmentPlan(String planType, List<String> tests, List<String> procedures, String diet, String regime) {
         this.planType = planType;
         Logger.log("TreatmentPlan", "«Дорога» операція: Формування базового медичного протоколу '" + planType + "'...");
-        simulateDelay(1500); // Емуляція важкого аналізу та валідації протоколу
+        simulateDelay(1500);
         this.tests = new ArrayList<>(tests);
         this.procedures = new ArrayList<>(procedures);
         this.diet = diet;
         this.regime = regime;
         this.patientName = "Шаблон (без призначення)";
     }
+
+    public TreatmentPlan() {
+
+    }
+
 
     public void setPatientName(String patientName) { this.patientName = patientName; }
     public void addTest(String test) { this.tests.add(test); }
@@ -27,15 +32,14 @@ class TreatmentPlan implements Cloneable {
 
     @Override
     public TreatmentPlan clone() {
-        try {
-            TreatmentPlan cloned = (TreatmentPlan) super.clone();
-            // Глибоке клонування списків для збереження незалежності стану
-            cloned.tests = new ArrayList<>(this.tests);
-            cloned.procedures = new ArrayList<>(this.procedures);
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Помилка клонування об'єкта TreatmentPlan", e);
-        }
+        TreatmentPlan cloned = new TreatmentPlan();
+        cloned.planType = this.planType;
+        cloned.tests = new ArrayList<>(this.tests);
+        cloned.procedures = new ArrayList<>(this.procedures);
+        cloned.diet = this.diet;
+        cloned.regime = this.regime;
+        cloned.patientName = this.patientName;
+        return cloned;
     }
 
     public void printInfo() {

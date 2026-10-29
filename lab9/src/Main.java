@@ -1,7 +1,7 @@
 import java.util.List;
 
 public class Main {
-    void main() {
+    public static void main(String[] args) {
         demoTask1_Singleton();
         System.out.println("\n-----------------------------------------------------------------------\n");
 
