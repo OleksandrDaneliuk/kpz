@@ -42,7 +42,7 @@ public class Booking {
     }
 
     private double calculateRoomTotal() {
-        return room.getBasePricePerNight() * nights * seasonStrategy.getMultiplier();
+        return seasonStrategy.calculate(room.getBasePricePerNight(), nights);
     }
 
     private double calculateServicesTotal() {

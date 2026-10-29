@@ -1,5 +1,5 @@
 public interface SeasonalPricingStrategy {
-    double getMultiplier();
+    double calculate(double base, int nights);
 }
 
 
