@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BookingFactory {
@@ -17,8 +19,22 @@ public class BookingFactory {
         Room room = new Room(request.roomNumber(), request.roomCategory(),
                 request.roomBasePrice());
 
-        return new Booking(idCounter.incrementAndGet(), guest, room, request.nights(),
-                Season.fromString(request.season()), taxCalculator,
-                request.includeBreakfast(), request.includeParking());
+        List<Booking.ExtraService> services = new ArrayList<>();
+        if (request.includeBreakfast()) {
+            services.add(Booking.ExtraService.BREAKFAST);
+        }
+        if (request.includeParking()) {
+            services.add(Booking.ExtraService.PARKING);
+        }
+
+        return Booking.create(
+                idCounter.incrementAndGet(),
+                guest,
+                room,
+                request.nights(),
+                Season.fromString(request.season()),
+                taxCalculator,
+                services
+        );
     }
 }
