@@ -5,7 +5,7 @@ public class Guest {
     private final String phone;
     private final String passportNumber;
 
-    public Guest(int id, String fullName, String phone, String passportNumber) {
+    Guest(int id, String fullName, String phone, String passportNumber) {
         if (id <= 0) {
             throw new IllegalArgumentException("ID гостя має бути додатним.");
         }

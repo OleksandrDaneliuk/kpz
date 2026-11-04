@@ -21,5 +21,36 @@ public class Main {
         System.out.println("- " + surgery.getArchive().get(0));
         System.out.println("- " + cardiology.getArchive().get(0));
         System.out.println("- " + pediatrics.getArchive().get(0));
+
+
+        //BUILDER
+        System.out.println("ЗАВДАННЯ 2: Направлення на обстеження (Builder)");
+
+
+        Referral customReferral = new Referral.Builder()
+                .setPatient("Коваленко С.П.")
+                .addTest("Загальний аналіз крові")
+                .addTest("УЗД черевної порожнини")
+                .setUrgent(true)
+                .setDoctorSignature("д-р Гриценко")
+                .build();
+
+        System.out.println(customReferral);
+
+        //Передопераційне направлення
+        ReferralDirector director = new ReferralDirector();
+        Referral preOpReferral = director.createPreOperativeReferral(new Referral.Builder(), "Бойко В.В.", "д-р Сергієнко");
+        System.out.println("\n" + preOpReferral);
+
+        //Спроба сформувати направлення без жодного аналізу
+        System.out.println("\nСпроба створення некоректного направлення:");
+        try {
+            new Referral.Builder()
+                    .setPatient("Безкоровайний Т.Г.")
+                    .setDoctorSignature("д-р Франко")
+                    .build();
+        } catch (IllegalStateException e) {
+            System.out.println("У журналі pomilok: \"" + e.getMessage() + "\"");
+        }
     }
 }

@@ -21,7 +21,6 @@ class TreatmentPlan implements Prototype<TreatmentPlan> {
     }
 
     public TreatmentPlan() {
-
     }
 
 

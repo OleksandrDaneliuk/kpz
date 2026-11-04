@@ -3,7 +3,7 @@ public class Room {
     private final String category; // "Standard", "Deluxe", "Suite"
     private final double basePricePerNight;
 
-    public Room(int roomNumber, String category, double basePricePerNight) {
+    Room(int roomNumber, String category, double basePricePerNight) {
         if (roomNumber <= 0) {
             throw new IllegalArgumentException("Номер кімнати повинен бути більшим за 0.");
         }
