@@ -52,5 +52,17 @@ public class Main {
         } catch (IllegalStateException e) {
             System.out.println("У журналі pomilok: \"" + e.getMessage() + "\"");
         }
+
+
+        System.out.println("ЗАВДАННЯ 3: Abstract Factory");
+
+        PatientRoom room101 = new PatientRoom(101);
+        PatientRoom room102 = new PatientRoom(102);
+        PatientRoom room103 = new PatientRoom(103);
+
+        room101.prepareKit(new AdultMedicalKitFactory());
+        room102.prepareKit(new PediatricMedicalKitFactory());
+        room103.prepareKit(new NewbornMedicalKitFactory());
     }
+
 }
