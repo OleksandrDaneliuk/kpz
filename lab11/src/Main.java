@@ -73,7 +73,20 @@ public class Main {
         beds.transfer("Bondar O.", "Ward 9");
     }
 
+    static void situation4Decorator() {
+        header("Situation 4: Patient card flags (Decorator)");
+        Task4Decorator.PatientCard card = new Task4Decorator.BasicPatientCard("Ivanenko M.");
+        card.display();
 
+        // flags added at runtime, in any combination
+        card = new Task4Decorator.AllergyFlag(card, "penicillin");
+        card = new Task4Decorator.FallRiskFlag(card);
+        card.display();
+
+        Task4Decorator.PatientCard other = new Task4Decorator.InfectionControlFlag(
+                new Task4Decorator.BasicPatientCard("Koval O."));
+        other.assignProcedure("blood draw");
+    }
     // Tests
 
     static void testSituation1Proxy() {
@@ -164,6 +177,38 @@ public class Main {
         check(indexOf(log, "transferred Bondar O. to Ward 9") >= 0, "patient is transferred to another ward");
         check(count(log, "[PatientRegistration]") == 2 && count(log, "[HospitalizationFacade] hospitalize(") == 2,
                 "transfer does not trigger a new hospitalization");
+    }
+
+    static void testSituation4Decorator() {
+        System.out.println("-- Task 4: Decorator");
+        List<String> log = capture(Main::situation4Decorator);
+
+        int firstWarning = indexOf(log, "WARNING");
+        check(indexOf(log, "[BasicPatientCard] displaying card of Ivanenko M.") == 0
+                        && firstWarning > 0,
+                "plain card is displayed without any warnings");
+        check(count(log, "[AllergyFlag] WARNING: allergy to penicillin") == 1,
+                "allergy warning is shown");
+        check(count(log, "[FallRiskFlag] WARNING: fall risk") == 1, "fall risk warning is shown");
+
+        int reminder = indexOf(log, "[InfectionControlFlag] REMINDER before 'blood draw'");
+        int assigned = indexOf(log, "[BasicPatientCard] procedure 'blood draw' assigned to Koval O.");
+        check(reminder >= 0 && assigned > reminder,
+                "protective equipment reminder comes before the procedure is assigned");
+        check(count(log, "[AllergyFlag] REMINDER") == 0, "other patient's card is not affected by these flags");
+
+        Task4Decorator.PatientCard stacked = new Task4Decorator.VipFlag(
+                new Task4Decorator.InfectionControlFlag(
+                        new Task4Decorator.AllergyFlag(new Task4Decorator.BasicPatientCard("Test P."), "nuts")));
+        check(stacked.patientName().equals("Test P."), "decorated card is used as a regular card");
+
+        Log.reset();
+        Log.setEcho(false);
+        stacked.display();
+        List<String> stackedLog = Log.lines();
+        Log.setEcho(true);
+        check(count(stackedLog, "WARNING") == 2 && count(stackedLog, "VIP patient") == 1,
+                "any combination of flags can be stacked at runtime");
     }
 
 
