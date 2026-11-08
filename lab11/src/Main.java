@@ -14,11 +14,13 @@ public class Main {
         System.out.println("##### DEMO #####");
         situation1Proxy();
         situation2Adapter();
+        situation3Facade();
 
         System.out.println();
         System.out.println("##### TESTS #####");
         testSituation1Proxy();
         testSituation2Adapter();
+        testSituation3Facade();
     }
 
     static void header(String title) {
@@ -51,6 +53,24 @@ public class Main {
         hospital.importFrom(new Task2Adapter.VendorAAdapter(new Task2Adapter.VendorADriver()));
         // second analyzer, different format: the hospital system is unchanged
         hospital.importFrom(new Task2Adapter.VendorBAdapter(new Task2Adapter.VendorBDevice()));
+    }
+
+    static void situation3Facade() {
+        header("Situation 3: Hospitalization (Facade)");
+        Task3Facade.BedRegistry beds = new Task3Facade.BedRegistry();
+        Task3Facade.HospitalizationFacade facade = new Task3Facade.HospitalizationFacade(
+                new Task3Facade.PatientRegistration(), beds, new Task3Facade.DoctorAssignment(),
+                new Task3Facade.ExaminationPlanner(), new Task3Facade.KitchenNotifier());
+
+        Task3Facade.AdmissionsDepartment admissions = new Task3Facade.AdmissionsDepartment(facade);
+        Task3Facade.PlannedHospitalizationModule planned =
+                new Task3Facade.PlannedHospitalizationModule(facade);
+
+        admissions.admitEmergency("Bondar O.", "Ward 5");
+        planned.admitPlanned("Melnyk T.", "Ward 7");
+
+        Log.log("Runner", "transferring Bondar O. directly through BedRegistry (no facade)");
+        beds.transfer("Bondar O.", "Ward 9");
     }
 
 
@@ -117,6 +137,33 @@ public class Main {
         hospital.importFrom(third);
         Log.setEcho(true);
         check(hospital.cardOf("P-003").size() == 1, "new analyzer connects without changing the hospital system");
+    }
+
+    static void testSituation3Facade() {
+        System.out.println("-- Task 3: Facade");
+        List<String> log = capture(Main::situation3Facade);
+
+        check(count(log, "[HospitalizationFacade] hospitalize(") == 2,
+                "two hospitalizations went through the same facade operation");
+        check(count(log, "[PatientRegistration]") == 2, "registration called for both patients");
+        check(count(log, "[DoctorAssignment]") == 2, "doctor assigned for both patients");
+        check(count(log, "[ExaminationPlanner]") == 2, "examination plan built for both patients");
+        check(count(log, "[KitchenNotifier]") == 2, "kitchen notified for both patients");
+        check(indexOf(log, "diet meals for Melnyk T.") >= 0, "kitchen is notified about the planned patient");
+        check(indexOf(log, "built PLANNED examination plan for Melnyk T.") >= 0,
+                "planned patient gets a PLANNED examination plan");
+
+        int reg = indexOf(log, "[PatientRegistration]");
+        int bed = indexOf(log, "[BedRegistry]");
+        int doc = indexOf(log, "[DoctorAssignment]");
+        int plan = indexOf(log, "[ExaminationPlanner]");
+        int kitchen = indexOf(log, "[KitchenNotifier]");
+        check(reg < bed && bed < doc && doc < plan && plan < kitchen,
+                "subsystems are called in the defined order");
+
+        check(indexOf(log, "transferred Bondar O. to Ward 9") >= 0, "patient is transferred to another ward");
+        check(count(log, "[PatientRegistration]") == 2 && count(log, "[HospitalizationFacade] hospitalize(") == 2,
+                "transfer does not trigger a new hospitalization");
     }
 
 

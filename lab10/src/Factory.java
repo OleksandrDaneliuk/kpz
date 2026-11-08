@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-// --- Інтерфейс продукту (Виписний документ) ---
+// --- Інтерфейс продукту ---
 interface DischargeDocument {
     String getTitle();
     String getContent();

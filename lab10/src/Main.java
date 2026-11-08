@@ -50,7 +50,7 @@ public class Main {
                     .setDoctorSignature("д-р Франко")
                     .build();
         } catch (IllegalStateException e) {
-            System.out.println("У журналі pomilok: \"" + e.getMessage() + "\"");
+            System.out.println("У журналі помилок: \"" + e.getMessage() + "\"");
         }
 
 
