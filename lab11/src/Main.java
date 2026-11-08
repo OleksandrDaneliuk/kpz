@@ -13,10 +13,12 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("##### DEMO #####");
         situation1Proxy();
+        situation2Adapter();
 
         System.out.println();
         System.out.println("##### TESTS #####");
         testSituation1Proxy();
+        testSituation2Adapter();
     }
 
     static void header(String title) {
@@ -41,6 +43,14 @@ public class Main {
         file.openImage(3, doctor);       // first open: one download
         file.openImage(3, doctor);       // second open: no download
         file.openImage(3, receptionist); // denied
+    }
+
+    static void situation2Adapter() {
+        header("Situation 2: Lab analyzer (Adapter)");
+        Task2Adapter.HospitalLabSystem hospital = new Task2Adapter.HospitalLabSystem();
+        hospital.importFrom(new Task2Adapter.VendorAAdapter(new Task2Adapter.VendorADriver()));
+        // second analyzer, different format: the hospital system is unchanged
+        hospital.importFrom(new Task2Adapter.VendorBAdapter(new Task2Adapter.VendorBDevice()));
     }
 
 
@@ -68,6 +78,47 @@ public class Main {
         check(count(log, "[MedicalImageProxy#") >= 3 && count(log, "[RealMedicalImage#") >= 3,
                 "log shows both the proxy and the real object acting");
     }
+
+    static void testSituation2Adapter() {
+        System.out.println("-- Task 2: Adapter");
+        List<String> log = capture(Main::situation2Adapter);
+
+        check(count(log, "[VendorADriver] returns raw string: PID=P-001;GLU=5400;CREA=88;UREA=4300") == 1,
+                "raw vendor A string is logged");
+        check(count(log, "[VendorBDevice] returns raw string: P-002|G:7200,U:5100,K:4200") == 1,
+                "raw vendor B string is logged");
+        check(count(log, "P-001: Glucose = 5.400 mmol/L") == 1, "vendor A glucose converted to mmol/L");
+        check(count(log, "P-001: Creatinine = 0.088 mmol/L") == 1, "vendor A creatinine converted");
+        check(count(log, "P-002: Potassium = 4.200 mmol/L") == 1, "vendor B potassium converted");
+        check(count(log, "[HospitalLabSystem] wrote to patient card") == 6,
+                "hospital system wrote all 6 results to patient cards");
+
+        // direct (non-log) checks on the adapter output
+        List<Task2Adapter.LabResult> a =
+                new Task2Adapter.VendorAAdapter(new Task2Adapter.VendorADriver()).fetchResults();
+        check(a.size() == 3 && a.get(0).patientId().equals("P-001")
+                        && Math.abs(a.get(0).valueMmolPerL() - 5.4) < 1e-9,
+                "adapter A returns hospital LabResult objects (5.4 mmol/L)");
+
+        // a third, unknown analyzer plugs in without any change to HospitalLabSystem
+        Task2Adapter.LabAnalyzer third = new Task2Adapter.LabAnalyzer() {
+            @Override
+            public String name() {
+                return "VendorC analyzer";
+            }
+
+            @Override
+            public List<Task2Adapter.LabResult> fetchResults() {
+                return List.of(new Task2Adapter.LabResult("P-003", "Sodium", 140.0));
+            }
+        };
+        Task2Adapter.HospitalLabSystem hospital = new Task2Adapter.HospitalLabSystem();
+        Log.setEcho(false);
+        hospital.importFrom(third);
+        Log.setEcho(true);
+        check(hospital.cardOf("P-003").size() == 1, "new analyzer connects without changing the hospital system");
+    }
+
 
     static List<String> capture(Runnable scenario) {
         Log.reset();
