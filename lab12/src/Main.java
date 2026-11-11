@@ -5,5 +5,9 @@ public class Main {
         System.out.println("\n--------------------------------------------------------------------------------\n");
 
         HospitalStructureTask.run();
+
+        System.out.println("\n--------------------------------------------------------------------------------\n");
+
+        PrescriptionManagementTask.run();
     }
 }
